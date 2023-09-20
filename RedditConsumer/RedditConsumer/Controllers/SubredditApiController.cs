@@ -26,8 +26,7 @@ namespace RedditConsumer.Controllers
 
             do
             {
-
-                WaitOnRateLimit();
+                await WaitOnRateLimit();
 
                 string token = await GetAccesstoken();
 
@@ -65,24 +64,6 @@ namespace RedditConsumer.Controllers
                                 return;
                             }
                         }
-                    }
-                    else
-                    {
-                        Console.WriteLine("Error fetching the data:");
-                        var errorContent = JObject.Parse(responseContent);
-
-                        if (errorContent["error"].ToString() == "429")
-                        {
-                            Console.WriteLine("Waiting because of Ratelimit");
-                            WaitOnRateLimit();
-                        }
-                        else
-                        {
-                            Console.WriteLine(responseContent);
-                        }
-                        
-
-
                     }
                 }
 

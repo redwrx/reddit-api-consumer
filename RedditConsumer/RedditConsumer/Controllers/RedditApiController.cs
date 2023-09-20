@@ -50,14 +50,19 @@ namespace RedditConsumer.Controllers
         /// <summary>
         /// Waits until the RateLimit period is reset when the API reached the limit
         /// </summary>
-        protected void WaitOnRateLimit()
+        protected async Task WaitOnRateLimit()
         {
             if(remainingRateLimit < 2)
             {
-                //int waitSeconds = (int) (DateTime.Now - endOfCurrentRateLimit).TotalSeconds;
-                //Console.WriteLine($"Waiting for {waitSeconds} due to RateLimit");
-                Task.Delay(TimeSpan.FromSeconds(60));
-            } 
+                int waitSeconds = (int)(DateTime.Now - endOfCurrentRateLimit).TotalSeconds;
+                waitSeconds = waitSeconds < 1 ? 60 : waitSeconds;
+                Console.WriteLine($"Waiting for {waitSeconds} due to RateLimit");
+                await Task.Delay(TimeSpan.FromSeconds(waitSeconds));
+            }
+            else
+            {
+                await Task.Delay(TimeSpan.FromSeconds(1));
+            }
         }
         
 

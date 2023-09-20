@@ -71,17 +71,17 @@ class Program
 
         while (true)
         {
-            Console.WriteLine();
+            Console.Clear();
             Console.WriteLine($"----------------{DateTime.Now.ToShortTimeString()}----------------");
             foreach (string subreddit in subreddits)
             {
                 Console.WriteLine();
                 Console.WriteLine($"****** {subreddit} ******");
-
+                Console.WriteLine();
                 var topPost = postsController.GetTopPostByVote(subreddit);
                 if (topPost != null)
                 {
-                    Console.WriteLine($"Top post (Upvotes: {topPost.GetScore()}):");
+                    Console.WriteLine($"Top Post(Upvotes => {topPost.GetScore()}):");
                     Console.WriteLine(topPost.GetTitle());
                 }
                 else
@@ -95,7 +95,7 @@ class Program
                 var topUserCount = postsController.GetMostActiveUser(subreddit);
                 if (topUserCount.Username != null)
                 {
-                    Console.WriteLine($"Top User  (Number of posts: {topUserCount.PostCount}):");
+                    Console.WriteLine($"Top User(# Of Posts => {topUserCount.PostCount}):");
                     Console.WriteLine($"{topUserCount.Username}");
                 }
             }

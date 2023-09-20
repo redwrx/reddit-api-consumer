@@ -12,9 +12,14 @@ namespace RedditConsumer.Repositories.InMemory
 
         public User Add(User user)
         {
-            if (!users.Contains(user))
+            var existing = users.Where(u => u.GetUsername() == user.GetUsername()).FirstOrDefault();
+            if (existing == null)
             {
                 users.Add(user);
+            }
+            else
+            {
+                user = existing;
             }
 
             return user;

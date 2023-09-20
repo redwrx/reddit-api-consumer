@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using RedditConsumer.Models;
+﻿using RedditConsumer.Models;
 
 namespace RedditConsumer.Repositories.InMemory
 {
@@ -14,49 +12,62 @@ namespace RedditConsumer.Repositories.InMemory
 
         public void Add(Post post)
         {
-            Post existing = posts.FirstOrDefault(p => p == post);
-            if(existing != null)
+            lock (posts)
             {
-                existing.SetScore(post.GetScore());
-            }
-            else
-            {
-                posts.Add(post);
+                Post existing = posts.FirstOrDefault(p => p.Equals(post));
+                if (existing != null)
+                {
+                    existing.SetScore(post.GetScore());
+                }
+                else
+                {
+
+                    posts.Add(post);
+                }
             }
         }
 
         public bool Exist(string id)
         {
-            return posts.Where(p => p.GetId() == id).Any();
+            lock (posts)
+            {
+                return posts.Where(p => p.GetId() == id).Any();
+            }
         }
 
         public Tuple<string, int> GetMostActiveUserWithCount(string subreddit)
         {
-            var userPostCount = posts
+            lock (posts)
+            {
+                var userPostCount = posts
                 .Where(p => p.GetSubreddit() == subreddit)
                 .GroupBy(p => p.GetUser().GetId()).Select(group => new
-            {
-                UserId = group.Key,
-                Count = group.Count()
-            }).OrderByDescending(g => g.Count).FirstOrDefault();
+                {
+                    UserId = group.Key,
+                    Count = group.Count()
+                }).OrderByDescending(g => g.Count).FirstOrDefault();
 
-            String userId = null;
-            int count = 0;
-            if(userPostCount != null)
-            {
-                userId = userPostCount.UserId;
-                count = userPostCount.Count;
+                String userId = null;
+                int count = 0;
+                if (userPostCount != null)
+                {
+                    userId = userPostCount.UserId;
+                    count = userPostCount.Count;
+                }
+
+                return new Tuple<string, int>(userId, count);
             }
-
-            return new Tuple<string, int>(userId, count);
 
         }
 
         public Post GetTopPostByVote(string subreddit)
         {
-            return posts
+            lock (posts)
+            {
+                return posts
                 .Where(p => p.GetSubreddit() == subreddit)
                 .OrderByDescending(post => post.GetScore()).FirstOrDefault();
+            }
         }
     }
 }
