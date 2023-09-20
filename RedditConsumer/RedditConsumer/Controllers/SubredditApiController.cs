@@ -11,20 +11,16 @@ namespace RedditConsumer.Controllers
         readonly IPostRepository postRepository;
         readonly IUserRepository userRepository;
 
-        ///// <summary>
-        ///// Keeps the EPOC time for beginning of the processing
-        ///// </summary>
-        double beginning;
+        
 
         public SubredditApiController(IPostRepository postRepository, IUserRepository userRepository)
         {
             this.userRepository = userRepository;
             this.postRepository = postRepository;
 
-            beginning = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         }
 
-        public async Task FetchData(string subreddit)
+        public async Task FetchData(string subreddit, double beginning)
         {
             string after = null;
 
@@ -56,11 +52,13 @@ namespace RedditConsumer.Controllers
                         {
                             var post = child.Data;
 
+                            // check if the post created after the beginning
+                            // if it is older than beginning then we don't continue with next pages
                             if (post.Created >= beginning)
                             {
                                 //Add the new user and post
                                 User user = userRepository.Add(new User(post.Author));
-                                postRepository.Add(new Post(post.Id, user, post.Title, post.Score));
+                                postRepository.Add(new Post(post.Id, user, post.Title, post.Score, subreddit));
                             }
                             else
                             {
@@ -71,7 +69,20 @@ namespace RedditConsumer.Controllers
                     else
                     {
                         Console.WriteLine("Error fetching the data:");
-                        Console.WriteLine(responseContent);
+                        var errorContent = JObject.Parse(responseContent);
+
+                        if (errorContent["error"].ToString() == "429")
+                        {
+                            Console.WriteLine("Waiting because of Ratelimit");
+                            WaitOnRateLimit();
+                        }
+                        else
+                        {
+                            Console.WriteLine(responseContent);
+                        }
+                        
+
+
                     }
                 }
 

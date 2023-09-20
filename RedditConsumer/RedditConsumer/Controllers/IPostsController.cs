@@ -5,7 +5,7 @@ namespace RedditConsumer.Controllers
 {
     public interface IPostsController
     {
-        UserPostCount GetMostActiveUser();
-        Post GetTopPostByVote();
+        UserPostCount GetMostActiveUser(string subreddit);
+        Post GetTopPostByVote(string subreddit);
     }
 }

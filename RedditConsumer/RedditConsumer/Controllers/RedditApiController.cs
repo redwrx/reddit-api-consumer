@@ -7,8 +7,6 @@ namespace RedditConsumer.Controllers
 {
 	public abstract class RedditApiController
 	{
-        
-
         protected static readonly string clientId = ConfigurationManager.AppSettings.Get("clientId");
         protected static readonly string clientSecret = ConfigurationManager.AppSettings.Get("clientSecret");
         protected static readonly string userAgent = ConfigurationManager.AppSettings.Get("userAgent");
@@ -54,11 +52,11 @@ namespace RedditConsumer.Controllers
         /// </summary>
         protected void WaitOnRateLimit()
         {
-            if(remainingRateLimit == 0)
+            if(remainingRateLimit < 2)
             {
-                int waitSeconds = (int) (DateTime.Now - endOfCurrentRateLimit).TotalSeconds;
-                Console.WriteLine($"Waiting for {waitSeconds} due to RateLimit");
-                Task.Delay(TimeSpan.FromSeconds(waitSeconds));
+                //int waitSeconds = (int) (DateTime.Now - endOfCurrentRateLimit).TotalSeconds;
+                //Console.WriteLine($"Waiting for {waitSeconds} due to RateLimit");
+                Task.Delay(TimeSpan.FromSeconds(60));
             } 
         }
         
@@ -107,7 +105,7 @@ namespace RedditConsumer.Controllers
                 if (response.IsSuccessStatusCode)
                 {
                     // Parse the response JSON to get the access token
-                    var responseData = JObject.Parse(responseContent);
+                var responseData = JObject.Parse(responseContent);
                     token = responseData["access_token"].ToString();
                     expiresIn = (int) responseData["expires_in"];
                 }
@@ -118,8 +116,6 @@ namespace RedditConsumer.Controllers
                 }
             }
         }
-
-
     }
 }
 

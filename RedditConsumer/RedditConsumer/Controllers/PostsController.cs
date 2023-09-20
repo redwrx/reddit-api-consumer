@@ -16,14 +16,14 @@ namespace RedditConsumer.Controllers
             this.postRepository = postRepository;
         }
 
-        public Post GetTopPostByVote()
+        public Post GetTopPostByVote(string subreddit)
         {
-            return postRepository.GetTopPostByVote();
+            return postRepository.GetTopPostByVote(subreddit);
         }
 
-        public UserPostCount GetMostActiveUser()
+        public UserPostCount GetMostActiveUser(string subreddit)
         {
-            var tuple = postRepository.GetMostActiveUserWithCount();
+            var tuple = postRepository.GetMostActiveUserWithCount(subreddit);
             string username = null;
 
             if (tuple.Item1 != null)

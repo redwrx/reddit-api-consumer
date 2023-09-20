@@ -1,4 +1,5 @@
 ﻿
+using System.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RedditConsumer.Controllers;
 using RedditConsumer.Repositories;
@@ -7,6 +8,16 @@ using RedditConsumer.Repositories.InMemory;
 class Program
 {
     static ServiceProvider serviceProvider;
+
+    ///// <summary>
+    ///// Keeps the EPOC time for beginning of the processing
+    ///// </summary>
+    static double beginning;
+
+    /// <summary>
+    /// Subreddits for this app
+    /// </summary>
+    static string[] subreddits;
 
     static async Task Main(string[] args)
     {
@@ -17,40 +28,79 @@ class Program
             .AddSingleton<ISubredditApiController, SubredditApiController>()
             .BuildServiceProvider();
 
-        // Step 2: Make API Requests with the Access Token
-        await MakeApiRequest();
+        beginning = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
-        Console.WriteLine("Press any key to exit...");
-        Console.ReadKey();
+        subreddits = ConfigurationManager.AppSettings.Get("subreddits").Split(",");
+
+
+        foreach(var subreddit in subreddits)
+        {
+            Task.Run(() =>
+            {
+                fetchSubredditData(subreddit);
+            });
+        }
+
+        await showResult();
+
+    }
+
+    static async Task fetchSubredditData(string subreddit)
+    {
+        var redditApiController = serviceProvider.GetService<ISubredditApiController>();
+        while (true)
+        {
+            try
+            {
+                await redditApiController.FetchData(subreddit, beginning);
+                await Task.Delay(TimeSpan.FromSeconds(1));
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine($"Unable to fetch data for {subreddit}. Unexpected exception: {e.Message}");
+            }
+        }
     }
 
 
-    static async Task MakeApiRequest()
+
+
+    static async Task showResult()
     {
         var postsController = serviceProvider.GetService<IPostsController>();
-        var redditApiController = serviceProvider.GetService<ISubredditApiController>();
-
 
         while (true)
         {
-
-
-            await redditApiController.FetchData("Fantasy_Football");
-
-            // Find and display the post with the most upvotes
-            //var topPost = posts.OrderByDescending(p => p.Score).FirstOrDefault();
-            var topPost = postsController.GetTopPostByVote();
-            if (topPost != null)
+            Console.WriteLine();
+            Console.WriteLine($"----------------{DateTime.Now.ToShortTimeString()}----------------");
+            foreach (string subreddit in subreddits)
             {
-                Console.WriteLine($"Top post: {topPost.GetTitle()} (Upvotes: {topPost.GetScore()})");
+                Console.WriteLine();
+                Console.WriteLine($"****** {subreddit} ******");
+
+                var topPost = postsController.GetTopPostByVote(subreddit);
+                if (topPost != null)
+                {
+                    Console.WriteLine($"Top post (Upvotes: {topPost.GetScore()}):");
+                    Console.WriteLine(topPost.GetTitle());
+                }
+                else
+                {
+                    Console.WriteLine("No posts yet!");
+                    continue;
+                }
+
+                Console.WriteLine();
+
+                var topUserCount = postsController.GetMostActiveUser(subreddit);
+                if (topUserCount.Username != null)
+                {
+                    Console.WriteLine($"Top User  (Number of posts: {topUserCount.PostCount}):");
+                    Console.WriteLine($"{topUserCount.Username}");
+                }
             }
 
-            // Find and display the user with the most posts
-            var topUserCount = postsController.GetMostActiveUser();
-            Console.WriteLine($"Top user: {topUserCount.Username} (Posts: {topUserCount.PostCount})");
-
-            // Sleep for a while before fetching new data (e.g., every 5 minutes)
-            await Task.Delay(TimeSpan.FromSeconds(1));
+            await Task.Delay(TimeSpan.FromSeconds(5));
 
         }
     }

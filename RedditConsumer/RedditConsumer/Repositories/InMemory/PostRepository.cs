@@ -30,9 +30,11 @@ namespace RedditConsumer.Repositories.InMemory
             return posts.Where(p => p.GetId() == id).Any();
         }
 
-        public Tuple<string, int> GetMostActiveUserWithCount()
+        public Tuple<string, int> GetMostActiveUserWithCount(string subreddit)
         {
-            var userPostCount = posts.GroupBy(p => p.GetUser().GetId()).Select(group => new
+            var userPostCount = posts
+                .Where(p => p.GetSubreddit() == subreddit)
+                .GroupBy(p => p.GetUser().GetId()).Select(group => new
             {
                 UserId = group.Key,
                 Count = group.Count()
@@ -50,9 +52,11 @@ namespace RedditConsumer.Repositories.InMemory
 
         }
 
-        public Post GetTopPostByVote()
+        public Post GetTopPostByVote(string subreddit)
         {
-            return posts.OrderByDescending(post => post.GetScore()).FirstOrDefault();
+            return posts
+                .Where(p => p.GetSubreddit() == subreddit)
+                .OrderByDescending(post => post.GetScore()).FirstOrDefault();
         }
     }
 }

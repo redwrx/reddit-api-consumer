@@ -7,13 +7,15 @@ namespace RedditConsumer.Models
         private readonly string title;
         private int score;
         private readonly User user;
+        private readonly string subreddit;
 
-        public Post(String id, User user, string title, int score)
+        public Post(String id, User user, string title, int score, string subreddit)
 		{
             this.id = id;
             this.title = title;
 			this.score = score;
 			this.user = user;
+            this.subreddit = subreddit;
 		}
 
         public string GetId()
@@ -39,6 +41,11 @@ namespace RedditConsumer.Models
         public User GetUser()
         {
             return user;
+        }
+
+        public string GetSubreddit()
+        {
+            return subreddit;
         }
 
         public bool Equals(Post? other)
