@@ -1,4 +1,5 @@
 ﻿
+using Microsoft.Extensions.DependencyInjection;
 using RedditConsumer.Controllers;
 using RedditConsumer.Repositories;
 using RedditConsumer.Repositories.InMemory;
@@ -6,16 +7,24 @@ using RedditConsumer.Repositories.InMemory;
 class Program
 {
 
-    static IUserRepository userRepository = new UserRepository();
+    //static IUserRepository userRepository;
 
-    static IPostRepository postRepository = new PostRepository();
+    //static IPostRepository postRepository
 
-    static PostsController postsController = new PostsController(postRepository, userRepository);
+    //static PostsController postsController = new PostsController(postRepository, userRepository);
 
-    static SubredditApiController redditApiController = new SubredditApiController(postRepository, userRepository);
+    //static SubredditApiController redditApiController = new SubredditApiController(postRepository, userRepository);
+
+    static ServiceProvider serviceProvider;
 
     static async Task Main(string[] args)
     {
+        serviceProvider = new ServiceCollection()
+            .AddSingleton<IUserRepository, UserRepository>()
+            .AddSingleton<IPostRepository, PostRepository>()
+            .AddSingleton<IPostsController, PostsController>()
+            .AddSingleton<ISubredditApiController, SubredditApiController>()
+            .BuildServiceProvider();
 
         // Step 2: Make API Requests with the Access Token
         await MakeApiRequest();
@@ -27,6 +36,9 @@ class Program
 
     static async Task MakeApiRequest()
     {
+        var postsController = serviceProvider.GetService<IPostsController>();
+        var redditApiController = serviceProvider.GetService<ISubredditApiController>();
+
 
         while (true)
         {
@@ -36,7 +48,7 @@ class Program
 
             // Find and display the post with the most upvotes
             //var topPost = posts.OrderByDescending(p => p.Score).FirstOrDefault();
-            var topPost = postRepository.GetTopPostByVote();
+            var topPost = postsController.GetTopPostByVote();
             Console.WriteLine($"Top post: {topPost.GetTitle()} (Upvotes: {topPost.GetScore()})");
 
             // Find and display the user with the most posts

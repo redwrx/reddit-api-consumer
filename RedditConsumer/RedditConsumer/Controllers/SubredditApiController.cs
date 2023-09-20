@@ -1,20 +1,17 @@
-﻿using System;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
 using RedditConsumer.Models;
 using RedditConsumer.Models.Reddit;
 using RedditConsumer.Repositories;
-using RedditConsumer.Repositories.InMemory;
 
 namespace RedditConsumer.Controllers
 {
-	public class SubredditApiController : RedditApiController
-	{
+    public class SubredditApiController : RedditApiController, ISubredditApiController
+    {
         readonly IPostRepository postRepository;
         readonly IUserRepository userRepository;
 
         public SubredditApiController(IPostRepository postRepository, IUserRepository userRepository)
-		{
+        {
             this.userRepository = userRepository;
             this.postRepository = postRepository;
         }
