@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using RedditConsumer.Factories;
 using RedditConsumer.Models;
 using RedditConsumer.Models.Reddit;
 using RedditConsumer.Repositories;
@@ -10,13 +10,15 @@ namespace RedditConsumer.Controllers
     {
         readonly IPostRepository postRepository;
         readonly IUserRepository userRepository;
+        readonly IHttpClientFactory httpClientFactory;
 
         
 
-        public SubredditApiController(IPostRepository postRepository, IUserRepository userRepository)
+        public SubredditApiController(IPostRepository postRepository, IUserRepository userRepository, IHttpClientFactory httpClientFactory)
         {
             this.userRepository = userRepository;
             this.postRepository = postRepository;
+            this.httpClientFactory = httpClientFactory;
 
         }
 
@@ -30,7 +32,7 @@ namespace RedditConsumer.Controllers
 
                 string token = await GetAccesstoken();
 
-                using (var client = new HttpClient())
+                using (var client = httpClientFactory.Build())
                 {
                     client.BaseAddress = new Uri(baseOAuthAddress);
                     client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");

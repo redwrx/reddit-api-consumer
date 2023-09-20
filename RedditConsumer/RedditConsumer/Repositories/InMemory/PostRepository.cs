@@ -4,7 +4,7 @@ namespace RedditConsumer.Repositories.InMemory
 {
 	public class PostRepository: IPostRepository
 	{
-        private static readonly List<Post> posts = new();
+        private readonly List<Post> posts = new();
 
 		public PostRepository()
 		{

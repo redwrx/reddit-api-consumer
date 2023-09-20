@@ -4,7 +4,7 @@ namespace RedditConsumer.Repositories.InMemory
 {
 	public class UserRepository: IUserRepository
 	{
-        private static readonly List<User> users = new();
+        private readonly List<User> users = new();
 
         public UserRepository()
 		{

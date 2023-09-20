@@ -14,6 +14,8 @@
     <None Remove="Repositories\InMemory\" />
     <None Remove="Controllers\" />
     <None Remove="Models\Dto\" />
+    <None Remove="Tests\" />
+    <None Remove="Factories\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\" />
@@ -22,6 +24,8 @@
     <Folder Include="Repositories\InMemory\" />
     <Folder Include="Controllers\" />
     <Folder Include="Models\Dto\" />
+    <Folder Include="Tests\" />
+    <Folder Include="Factories\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />

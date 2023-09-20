@@ -2,6 +2,7 @@
 using System.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RedditConsumer.Controllers;
+using RedditConsumer.Factories;
 using RedditConsumer.Repositories;
 using RedditConsumer.Repositories.InMemory;
 
@@ -26,6 +27,7 @@ class Program
             .AddSingleton<IPostRepository, PostRepository>()
             .AddSingleton<IPostsController, PostsController>()
             .AddSingleton<ISubredditApiController, SubredditApiController>()
+            .AddTransient<IHttpClientFactory, HttpClientFactory>()
             .BuildServiceProvider();
 
         beginning = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
