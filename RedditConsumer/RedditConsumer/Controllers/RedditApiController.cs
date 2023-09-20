@@ -1,5 +1,4 @@
-﻿using System;
-using System.Configuration;
+﻿using System.Configuration;
 using Newtonsoft.Json.Linq;
 using System.Net.Http.Headers;
 
@@ -16,14 +15,21 @@ namespace RedditConsumer.Controllers
         /// <summary>
         /// Keeps the remaining number of ratelimit capacity based on X-RateLimit-Remaining http header
         /// </summary>
-        int remainingRateLimit = int.MaxValue;
+        static int remainingRateLimit = int.MaxValue;
 
         /// <summary>
         /// Points to the end of current RateLimit period based on X-RateLimit-Reset http header
         /// </summary>
-        DateTime endOfCurrentRateLimit = DateTime.Now;
+        static DateTime endOfCurrentRateLimit = DateTime.Now;
 
+        /// <summary>
+        /// Access token cached
+        /// </summary>
         static string token;
+
+        /// <summary>
+        /// Access token expires in number of seconds
+        /// </summary>
         static int expiresIn = 0;
 
 

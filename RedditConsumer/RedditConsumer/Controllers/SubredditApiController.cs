@@ -12,14 +12,11 @@ namespace RedditConsumer.Controllers
         readonly IUserRepository userRepository;
         readonly IHttpClientFactory httpClientFactory;
 
-        
-
         public SubredditApiController(IPostRepository postRepository, IUserRepository userRepository, IHttpClientFactory httpClientFactory)
         {
             this.userRepository = userRepository;
             this.postRepository = postRepository;
             this.httpClientFactory = httpClientFactory;
-
         }
 
         public async Task FetchData(string subreddit, double beginning)

@@ -8,6 +8,8 @@ using RedditConsumer.Repositories.InMemory;
 
 class Program
 {
+    const int SCREEN_REFERESH_RATE_IN_SECONDS = 5;
+
     static ServiceProvider serviceProvider;
 
     ///// <summary>
@@ -64,9 +66,6 @@ class Program
         }
     }
 
-
-
-
     static async Task showResult()
     {
         var postsController = serviceProvider.GetService<IPostsController>();
@@ -102,7 +101,7 @@ class Program
                 }
             }
 
-            await Task.Delay(TimeSpan.FromSeconds(5));
+            await Task.Delay(TimeSpan.FromSeconds(SCREEN_REFERESH_RATE_IN_SECONDS));
 
         }
     }
