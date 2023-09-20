@@ -9,14 +9,58 @@ namespace RedditConsumer.Controllers
 	{
         
 
-        protected readonly string clientId = ConfigurationManager.AppSettings.Get("clientId");
-        protected readonly string clientSecret = ConfigurationManager.AppSettings.Get("clientSecret");
-        protected readonly string userAgent = ConfigurationManager.AppSettings.Get("userAgent");
-        protected readonly string baseAddress = ConfigurationManager.AppSettings.Get("redditBaseAddress");
-        protected readonly string baseOAuthAddress = ConfigurationManager.AppSettings.Get("redditOAuthBaseAddress");
+        protected static readonly string clientId = ConfigurationManager.AppSettings.Get("clientId");
+        protected static readonly string clientSecret = ConfigurationManager.AppSettings.Get("clientSecret");
+        protected static readonly string userAgent = ConfigurationManager.AppSettings.Get("userAgent");
+        protected static readonly string baseAddress = ConfigurationManager.AppSettings.Get("redditBaseAddress");
+        protected static readonly string baseOAuthAddress = ConfigurationManager.AppSettings.Get("redditOAuthBaseAddress");
+
+        /// <summary>
+        /// Keeps the remaining number of ratelimit capacity based on X-RateLimit-Remaining http header
+        /// </summary>
+        int remainingRateLimit = int.MaxValue;
+
+        /// <summary>
+        /// Points to the end of current RateLimit period based on X-RateLimit-Reset http header
+        /// </summary>
+        DateTime endOfCurrentRateLimit = DateTime.Now;
 
         static string token;
         static int expiresIn = 0;
+
+
+        /// <summary>
+        /// Updates Ratelimit info based on headers returned by Reddit API
+        /// </summary>
+        /// <param name="headers"></param>
+        protected void UpdateRateLimit(HttpResponseHeaders headers)
+        {
+            try
+            {
+                remainingRateLimit = (int)double.Parse(headers.GetValues("X-Ratelimit-Remaining").First());
+                int remainingSecondsToEnd = int.Parse(headers.GetValues("X-Ratelimit-Reset").First());
+                endOfCurrentRateLimit = DateTime.Now.AddSeconds(remainingSecondsToEnd);
+            }
+            catch(Exception e)
+            {
+                endOfCurrentRateLimit = DateTime.Now;
+                remainingRateLimit = int.MaxValue;
+                Console.WriteLine($"Unable to update RateLimit info: {e.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Waits until the RateLimit period is reset when the API reached the limit
+        /// </summary>
+        protected void WaitOnRateLimit()
+        {
+            if(remainingRateLimit == 0)
+            {
+                int waitSeconds = (int) (DateTime.Now - endOfCurrentRateLimit).TotalSeconds;
+                Console.WriteLine($"Waiting for {waitSeconds} due to RateLimit");
+                Task.Delay(TimeSpan.FromSeconds(waitSeconds));
+            } 
+        }
         
 
         /// <summary>
@@ -24,7 +68,7 @@ namespace RedditConsumer.Controllers
         /// Otherwise it requests a new token and cache it.
         /// </summary>
         /// <returns></returns>
-        protected async Task<string> getAccesstoken()
+        protected async Task<string> GetAccesstoken()
         {
             // when the token expires in 2 minutes, then we need to get another token
             if(expiresIn < 120)

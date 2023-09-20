@@ -6,4 +6,3 @@
         public required string After { get; set; }
     }
 }
-

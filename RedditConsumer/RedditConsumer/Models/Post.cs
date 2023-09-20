@@ -5,12 +5,12 @@ namespace RedditConsumer.Models
     {
         private readonly string id;
         private readonly string title;
-        private readonly int score;
+        private int score;
         private readonly User user;
 
-        public Post(User user, string title, int score)
+        public Post(String id, User user, string title, int score)
 		{
-            this.id = Guid.NewGuid().ToString();
+            this.id = id;
             this.title = title;
 			this.score = score;
 			this.user = user;
@@ -29,6 +29,11 @@ namespace RedditConsumer.Models
         public int GetScore()
         {
             return score;
+        }
+
+        public void SetScore(int score)
+        {
+            this.score = score;
         }
 
         public User GetUser()
@@ -53,7 +58,7 @@ namespace RedditConsumer.Models
 
         public override int GetHashCode()
         {
-return id.GetHashCode();
+            return id.GetHashCode();
         }
     }
 }

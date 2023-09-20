@@ -14,10 +14,20 @@ namespace RedditConsumer.Repositories.InMemory
 
         public void Add(Post post)
         {
-            if(!posts.Contains(post))
+            Post existing = posts.FirstOrDefault(p => p == post);
+            if(existing != null)
+            {
+                existing.SetScore(post.GetScore());
+            }
+            else
             {
                 posts.Add(post);
             }
+        }
+
+        public bool Exist(string id)
+        {
+            return posts.Where(p => p.GetId() == id).Any();
         }
 
         public Tuple<string, int> GetMostActiveUserWithCount()
@@ -26,7 +36,7 @@ namespace RedditConsumer.Repositories.InMemory
             {
                 UserId = group.Key,
                 Count = group.Count()
-            }).OrderByDescending(g => g.Count).First();
+            }).OrderByDescending(g => g.Count).FirstOrDefault();
 
             String userId = null;
             int count = 0;
@@ -42,7 +52,7 @@ namespace RedditConsumer.Repositories.InMemory
 
         public Post GetTopPostByVote()
         {
-            return posts.OrderByDescending(post => post.GetScore()).First();
+            return posts.OrderByDescending(post => post.GetScore()).FirstOrDefault();
         }
     }
 }
